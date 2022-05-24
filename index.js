@@ -31,10 +31,15 @@ const run = async () => {
     try {
         await client.connect();
         const partsCollection = client.db("bicycleverse").collection("parts");
+        const reviewsCollection = client.db("bicycleverse").collection("reviews");
 
         app.get('/parts', async (req, res) => {
             const result = await partsCollection.find().toArray();
             res.send(result)
+        });
+        app.get('/reviews', async (req, res) => {
+            const result = await reviewsCollection.find().toArray();
+            res.send(result);
         })
     }
     finally {
