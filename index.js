@@ -58,13 +58,6 @@ const run = async () => {
             res.send(featuredParts)
         })
 
-        app.get('/partsCollection', async (req, res) => {
-            const category = req.query.category;
-            const categoryParts = await partsCollection.find({ category: category }).toArray();
-            res.send(categoryParts);
-
-        })
-
         app.get('/part/:id', async (req, res) => {
             const id = req.params.id;
             const result = await partsCollection.findOne({ _id: ObjectId(id) });
@@ -77,10 +70,11 @@ const run = async () => {
             const filter = { _id: ObjectId(id) };
             const updateDoc = {
                 $set: {
-                    stock: newStock
+                    stock: newStock.newStock
                 }
             }
             const result = await partsCollection.updateOne(filter, updateDoc, { upsert: true })
+            res.send(result);
         })
 
         app.get('/orders', async (req, res) => {
@@ -92,6 +86,13 @@ const run = async () => {
             const order = req.body;
             const result = await ordersCollection.insertOne(order);
             res.send(result);
+        })
+
+        app.get('/partsCollection', async (req, res) => {
+            const category = req.query.category;
+            const categoryParts = await partsCollection.find({ category: category }).toArray();
+            res.send(categoryParts);
+
         })
 
         app.get('/reviews', async (req, res) => {
