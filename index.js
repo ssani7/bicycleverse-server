@@ -32,15 +32,73 @@ const run = async () => {
         await client.connect();
         const partsCollection = client.db("bicycleverse").collection("parts");
         const reviewsCollection = client.db("bicycleverse").collection("reviews");
+        const ordersCollection = client.db("bicycleverse").collection("orders");
 
         app.get('/parts', async (req, res) => {
-            const result = await partsCollection.find().toArray();
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            let result;
+
+            if (page || size) {
+                result = await partsCollection.find().skip(page * size).limit(size).toArray();
+            }
+            else {
+                result = await partsCollection.find().toArray();
+            }
             res.send(result)
         });
+
+        app.get('/partscount', async (req, res) => {
+            const count = await partsCollection.countDocuments();
+            res.send({ count });
+        })
+
+        app.get('/featured', async (req, res) => {
+            const featuredParts = await partsCollection.find({ featured: true }).toArray();
+            res.send(featuredParts)
+        })
+
+        app.get('/partsCollection', async (req, res) => {
+            const category = req.query.category;
+            const categoryParts = await partsCollection.find({ category: category }).toArray();
+            res.send(categoryParts);
+
+        })
+
+        app.get('/part/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await partsCollection.findOne({ _id: ObjectId(id) });
+            res.send(result);
+        })
+
+        app.put('/part/:id', async (req, res) => {
+            const id = req.params.id;
+            const newStock = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    stock: newStock
+                }
+            }
+            const result = await partsCollection.updateOne(filter, updateDoc, { upsert: true })
+        })
+
+        app.get('/orders', async (req, res) => {
+            const result = await ordersCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await ordersCollection.insertOne(order);
+            res.send(result);
+        })
+
         app.get('/reviews', async (req, res) => {
             const result = await reviewsCollection.find().toArray();
             res.send(result);
         })
+
     }
     finally {
 
