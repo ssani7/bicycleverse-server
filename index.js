@@ -16,8 +16,11 @@ const verifyJWT = (req, res, next) => {
         return res.status(401).send({ message: 'Unauthorized access' })
     }
     const token = authHeader.split(' ')[1];
+
     jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
         if (err) {
+            console.log(err)
+
             return res.status(403).send({ message: 'Forbidden Access' })
         }
         req.decoded = decoded;
@@ -32,7 +35,9 @@ const run = async () => {
         await client.connect();
         const partsCollection = client.db("bicycleverse").collection("parts");
         const reviewsCollection = client.db("bicycleverse").collection("reviews");
+        const usersCollection = client.db("bicycleverse").collection("users");
         const ordersCollection = client.db("bicycleverse").collection("orders");
+
 
         app.get('/parts', async (req, res) => {
             const page = parseInt(req.query.page);
@@ -51,6 +56,20 @@ const run = async () => {
         app.get('/partscount', async (req, res) => {
             const count = await partsCollection.countDocuments();
             res.send({ count });
+        })
+
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email)
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+            res.send({ result, token });
         })
 
         app.get('/featured', async (req, res) => {
@@ -76,6 +95,23 @@ const run = async () => {
             const result = await partsCollection.updateOne(filter, updateDoc, { upsert: true })
             res.send(result);
         })
+
+        // admin features
+
+        app.get('/admin/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const user = await usersCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send(isAdmin)
+        })
+
+        app.get('/users', verifyJWT, async (req, res) => {
+            const result = await usersCollection.find().toArray();
+            res.send(result);
+        })
+
+
+        // ------------
 
         app.get('/orders', async (req, res) => {
             const result = await ordersCollection.find().toArray();
