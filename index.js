@@ -68,7 +68,7 @@ const run = async () => {
                 $set: user
             };
             const result = await usersCollection.updateOne(filter, updateDoc, options);
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1d' });
             res.send({ result, token });
         })
 
@@ -110,11 +110,28 @@ const run = async () => {
             res.send(result);
         })
 
-
-        // ------------
+        app.put('/makeAdmin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await usersCollection.findOne({ email: email });
+            const updateDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            };
+            const result = await usersCollection.updateOne({ email: email }, updateDoc);
+            res.send(result);
+        })
 
         app.get('/orders', async (req, res) => {
             const result = await ordersCollection.find().toArray();
+            res.send(result);
+        })
+
+        // ------------
+
+        app.get('/userOrders/:email', async (req, res) => {
+            const email = req.params.email;
+            const result = await ordersCollection.find({ email: email }).toArray();
             res.send(result);
         })
 
