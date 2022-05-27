@@ -58,7 +58,7 @@ const run = async () => {
             res.send({ count });
         })
 
-        app.put('/user/:email', async (req, res) => {
+        app.put('/loginUser/:email', async (req, res) => {
             const email = req.params.email;
             console.log(email)
             const user = req.body;
@@ -96,6 +96,13 @@ const run = async () => {
             res.send(result);
         })
 
+        app.get('/partsCollection', async (req, res) => {
+            const category = req.query.category;
+            const categoryParts = await partsCollection.find({ category: category }).toArray();
+            res.send(categoryParts);
+
+        })
+
         // admin features
 
         app.get('/admin/:email', verifyJWT, async (req, res) => {
@@ -122,6 +129,13 @@ const run = async () => {
             res.send(result);
         })
 
+        app.delete('/removeUser/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const result = await usersCollection.deleteOne({ email: email });
+            const deleteOrders = await ordersCollection.deleteMany({ email: email });
+            res.send(result)
+        })
+
         app.get('/orders', async (req, res) => {
             const result = await ordersCollection.find().toArray();
             res.send(result);
@@ -141,11 +155,14 @@ const run = async () => {
             res.send(result);
         })
 
-        app.get('/partsCollection', async (req, res) => {
-            const category = req.query.category;
-            const categoryParts = await partsCollection.find({ category: category }).toArray();
-            res.send(categoryParts);
-
+        app.put('/user/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const update = req.body;
+            const updateDoc = {
+                update
+            }
+            const result = await usersCollection.updateOne({ email: email }, updateDoc, { upsert: true });
+            res.send(result);
         })
 
         app.get('/reviews', async (req, res) => {
