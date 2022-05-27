@@ -165,9 +165,7 @@ const run = async () => {
             const email = req.params.email;
             const user = req.body;
             const updateDoc = {
-                $set: {
-                    user
-                }
+                $set: user
             }
             console.log(updateDoc)
             const result = await usersCollection.updateOne({ email: email }, updateDoc, { upsert: true });
