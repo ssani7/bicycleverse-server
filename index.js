@@ -60,7 +60,6 @@ const run = async () => {
 
         app.put('/loginUser/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email)
             const user = req.body;
             const filter = { email: email };
             const options = { upsert: true };
@@ -161,13 +160,12 @@ const run = async () => {
             res.send(user)
         })
 
-        app.put('/user/:email', verifyJWT, async (req, res) => {
+        app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             const updateDoc = {
                 $set: user
             }
-            console.log(updateDoc)
             const result = await usersCollection.updateOne({ email: email }, updateDoc, { upsert: true });
             res.send(result);
         })
