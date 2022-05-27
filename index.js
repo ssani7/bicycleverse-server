@@ -155,12 +155,21 @@ const run = async () => {
             res.send(result);
         })
 
+        app.get('/user/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const user = await usersCollection.findOne({ email: email });
+            res.send(user)
+        })
+
         app.put('/user/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
-            const update = req.body;
+            const user = req.body;
             const updateDoc = {
-                update
+                $set: {
+                    user
+                }
             }
+            console.log(updateDoc)
             const result = await usersCollection.updateOne({ email: email }, updateDoc, { upsert: true });
             res.send(result);
         })
