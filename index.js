@@ -99,6 +99,44 @@ const run = async () => {
 
         })
 
+        app.get('/userOrders/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const result = await ordersCollection.find({ email: email }).toArray();
+            res.send(result);
+        })
+
+        app.post('/orders', verifyJWT, async (req, res) => {
+            const order = req.body;
+            const result = await ordersCollection.insertOne(order);
+            res.send(result);
+        })
+
+        app.get('/user/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const user = await usersCollection.findOne({ email: email });
+            res.send(user)
+        })
+
+        app.put('/user/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const updateDoc = {
+                $set: user
+            }
+            const result = await usersCollection.updateOne({ email: email }, updateDoc, { upsert: true });
+            res.send(result);
+        })
+
+        app.get('/reviews', async (req, res) => {
+            const result = await reviewsCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/reviews', verifyJWT, async (req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.send(result);
+        })
         // admin features
 
         app.get('/admin/:email', verifyJWT, async (req, res) => {
@@ -157,44 +195,7 @@ const run = async () => {
 
         // ------------
 
-        app.get('/userOrders/:email', verifyJWT, async (req, res) => {
-            const email = req.params.email;
-            const result = await ordersCollection.find({ email: email }).toArray();
-            res.send(result);
-        })
 
-        app.post('/orders', verifyJWT, async (req, res) => {
-            const order = req.body;
-            const result = await ordersCollection.insertOne(order);
-            res.send(result);
-        })
-
-        app.get('/user/:email', verifyJWT, async (req, res) => {
-            const email = req.params.email;
-            const user = await usersCollection.findOne({ email: email });
-            res.send(user)
-        })
-
-        app.put('/user/:email', verifyJWT, async (req, res) => {
-            const email = req.params.email;
-            const user = req.body;
-            const updateDoc = {
-                $set: user
-            }
-            const result = await usersCollection.updateOne({ email: email }, updateDoc, { upsert: true });
-            res.send(result);
-        })
-
-        app.get('/reviews', async (req, res) => {
-            const result = await reviewsCollection.find().toArray();
-            res.send(result);
-        })
-
-        app.post('/reviews', verifyJWT, async (req, res) => {
-            const review = req.body;
-            const result = await reviewsCollection.insertOne(review);
-            res.send(result);
-        })
 
     }
     finally {
