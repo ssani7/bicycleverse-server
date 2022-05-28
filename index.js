@@ -16,11 +16,8 @@ const verifyJWT = (req, res, next) => {
         return res.status(401).send({ message: 'Unauthorized access' })
     }
     const token = authHeader.split(' ')[1];
-
     jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
         if (err) {
-            console.log(err)
-
             return res.status(403).send({ message: 'Forbidden Access' })
         }
         req.decoded = decoded;
@@ -116,7 +113,7 @@ const run = async () => {
             res.send(result);
         })
 
-        app.put('/makeAdmin/:email', async (req, res) => {
+        app.put('/makeAdmin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const user = await usersCollection.findOne({ email: email });
             const updateDoc = {
@@ -135,20 +132,38 @@ const run = async () => {
             res.send(result)
         })
 
-        app.get('/orders', async (req, res) => {
+        app.get('/orders', verifyJWT, async (req, res) => {
             const result = await ordersCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.delete('/order/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const result = await ordersCollection.deleteOne({ _id: ObjectId(id) });
+            res.send(result);
+        })
+
+        app.post('/parts', verifyJWT, async (req, res) => {
+            const part = req.body;
+            const result = await partsCollection.insertOne(part);
+            res.send(result);
+        })
+
+        app.delete('/part/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const result = await partsCollection.deleteOne({ _id: ObjectId(id) });
             res.send(result);
         })
 
         // ------------
 
-        app.get('/userOrders/:email', async (req, res) => {
+        app.get('/userOrders/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const result = await ordersCollection.find({ email: email }).toArray();
             res.send(result);
         })
 
-        app.post('/orders', async (req, res) => {
+        app.post('/orders', verifyJWT, async (req, res) => {
             const order = req.body;
             const result = await ordersCollection.insertOne(order);
             res.send(result);
@@ -160,7 +175,7 @@ const run = async () => {
             res.send(user)
         })
 
-        app.put('/user/:email', async (req, res) => {
+        app.put('/user/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             const updateDoc = {
@@ -170,8 +185,14 @@ const run = async () => {
             res.send(result);
         })
 
-        app.get('/reviews', async (req, res) => {
+        app.get('/reviews', verifyJWT, async (req, res) => {
             const result = await reviewsCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/reviews', verifyJWT, async (req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
             res.send(result);
         })
 
