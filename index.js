@@ -154,9 +154,8 @@ const run = async () => {
             res.send(result);
         })
 
-        app.put('/makeAdmin/:email', verifyJWT, async (req, res) => {
+        app.put('/makeAdmin/:email', async (req, res) => {
             const email = req.params.email;
-            const user = await usersCollection.findOne({ email: email });
             const updateDoc = {
                 $set: {
                     role: 'admin'
