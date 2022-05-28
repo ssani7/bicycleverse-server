@@ -55,6 +55,8 @@ const run = async () => {
             res.send({ count });
         })
 
+        // assigning jwt
+
         app.put('/loginUser/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
@@ -137,6 +139,7 @@ const run = async () => {
             const result = await reviewsCollection.insertOne(review);
             res.send(result);
         })
+
         // admin features
 
         app.get('/admin/:email', verifyJWT, async (req, res) => {
