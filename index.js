@@ -119,13 +119,13 @@ const run = async () => {
             res.send(user)
         })
 
-        app.put('/user/:email', verifyJWT, async (req, res) => {
-            const email = req.params.email;
+        app.put('/user/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
             const user = req.body;
             const updateDoc = {
                 $set: user
             }
-            const result = await usersCollection.updateOne({ email: email }, updateDoc, { upsert: true });
+            const result = await usersCollection.updateOne({ _id: ObjectId(id) }, updateDoc);
             res.send(result);
         })
 
